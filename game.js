@@ -1,36 +1,48 @@
 import rl from "readline-sync";
+import { addToLeaderboard, printLeaderboard } from './leaderboard.js';
 
-function random_number(min, max){
-    return Math.floor(Math.random() * (max - min + 1 )) + min;
+function random_number(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function game(){
-    let target_number = random_number(1,100);
-    let max_attempts = 10; 
+function game() {
+    let target_number = random_number(1, 100);
+    let max_attempts = 10;
     let Player_name = rl.question("Enter your Name: ");
-    let left_attempts;
     let used_attempts = 0;
-    
-    while(1){
+    let left_attempts = max_attempts;
+
+    while (used_attempts < max_attempts) {
         let Guess_number = rl.questionInt("Take a Guess: ");
         used_attempts++;
         left_attempts = max_attempts - used_attempts;
-        
-        if(Guess_number == target_number){
-            console.log(`Congrats ${Player_name}, you have guessed the right number within, ${used_attempts} Guess`)
+
+        if (Guess_number === target_number) {
+            console.log(`\n🎉 Congrats ${Player_name}, you guessed the right number in ${used_attempts} guesses!\n`);
             break;
+        } else if (Guess_number < target_number) {
+            console.log(`Too low! You have ${left_attempts} attempts left.`);
+        } else {
+            console.log(`Too high! You have ${left_attempts} attempts left.`);
         }
-        else if(Guess_number < target_number){
-            console.log(`Too low, You are left with ${left_attempts} guesses`);
-        }
-        else if(Guess_number > target_number){
-            console.log(`Too high, you are left with ${left_attempts} guesses`);
-        }
-
     }
-    console.log(`Sorry ${Player_name}, you've reached your attempt limit. the number was ${target_number}`)
+    if (left_attempts === 0) {
+        console.log(`\nGAME OVER! Sorry ${Player_name}, the correct number was ${target_number}\n`);
+    } 
 
-    // return max_attempts;
+    addToLeaderboard(Player_name, left_attempts);
 }
 
 game();
+
+while (true) {
+    const play = rl.keyInYN("Do you want to play again?");
+    if (play) {
+        game();
+    } else {
+        setTimeout(() => {
+            printLeaderboard();
+        }, 2000);
+        break;
+    }
+}
